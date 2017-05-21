@@ -142,6 +142,7 @@ class Board extends React.Component {
 
   restartGame () {
       const squareNodes = document.querySelectorAll('.square');
+      const playButton = document.getElementsByClassName('play')[0];
       this.setState({
         squares: Array(42).fill(null),
       })
@@ -150,6 +151,7 @@ class Board extends React.Component {
         for(let i = 0; i < squareNodes.length; i++) {
            squareNodes[i].style.backgroundColor = "#FFF";   
         }
+      playButton.style.visibility = 'hidden'
   }
 
   renderSquare(i) {
