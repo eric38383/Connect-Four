@@ -79,12 +79,14 @@ const winners = [
 
 
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
+class Square extends React.Component {
+  render() {
+    return (
+      <button className="square" onClick={this.props.onClick}>
     
-    </button>
-  )
+      </button>
+    )
+  }
 }
 
 class Play extends React.Component {
@@ -108,18 +110,19 @@ class Board extends React.Component {
   }
 
   handleClick(i) {
-    const squareNodes = document.querySelectorAll('.square');
     const squares = this.state.squares.slice();
+    const squareNodes = document.querySelectorAll('.square');
+
     if(checkMove(squares, i)) {
 
       if(this.state.redisNext) {
-        squareNodes[i].style.backgroundColor = "red";
+        squareNodes[i].style.backgroundColor = 'red'
         squares[i] = squareNodes[i].style.backgroundColor;
       }
 
       else {
-         squareNodes[i].style.backgroundColor = "yellow";
-         squares[i] = squareNodes[i].style.backgroundColor;
+        squareNodes[i].style.backgroundColor = 'yellow'
+        squares[i] = squareNodes[i].style.backgroundColor;
       }
 
       this.setState({
@@ -137,27 +140,30 @@ class Board extends React.Component {
     }
   }
 
-  /*
-  restartGame(button) {
-    const squareNodes = document.querySelectorAll('.square');
-    this.setState.squares = Array(42).fill(null)
-    console.log(this.status)
-      for(let i = 0; i < squareNodes.length; i++) {
-       squareNodes[i].style.backgroundColor = "#FFF";
-       this.status = 'Next player: ' + (this.state.redisNext ? 'Red' : 'Yellow');
-      }
-  }*/
+  restartGame () {
+      const squareNodes = document.querySelectorAll('.square');
+      this.setState({
+        squares: Array(42).fill(null),
+      })
+      status = 'Next player: ' + (this.state.redisNext ? 'Yellow' : 'Red');
+
+        for(let i = 0; i < squareNodes.length; i++) {
+           squareNodes[i].style.backgroundColor = "#FFF";   
+        }
+  }
 
   renderSquare(i) {
     return <Square onClick={() => this.handleClick(i)} />;
   }
 
   render() {
-      const win = checkWinner(this.state.squares)
+      const win = checkWinner(this.state.squares);
+      const playButton = document.getElementsByClassName('play')[0];
       let status;
         if (win) {
-          status = 'Winner'
-          this.setState.squares = Array(42).fill('orange');
+          status = 'Winner: ' + (this.state.redisNext ? 'Yellow' : 'Red')
+          playButton.style.visibility = 'visible';
+          this.state.squares = Array(42).fill('orange');
         }
 
         else {
@@ -176,7 +182,8 @@ class Board extends React.Component {
         }
     }
     return winner
-}
+  }
+
     return (
     <div className="center">
         <Play value="Play" onClick={() => this.restartGame()}/>
