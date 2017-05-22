@@ -106,13 +106,14 @@ class Board extends React.Component {
     this.state = {
       squares: Array(42).fill(null),
       redisNext: true,
+      turns: 0,
     };
   }
 
   handleClick(i) {
     const squares = this.state.squares.slice();
     const squareNodes = document.querySelectorAll('.square');
-
+    console.log(this.state.turns)
     if(checkMove(squares, i)) {
 
       if(this.state.redisNext) {
@@ -124,6 +125,8 @@ class Board extends React.Component {
         squareNodes[i].style.backgroundColor = 'yellow'
         squares[i] = squareNodes[i].style.backgroundColor;
       }
+
+      this.state.turns += 1;
 
       this.setState({
         squares: squares,
@@ -159,28 +162,40 @@ class Board extends React.Component {
   }
 
   render() {
-      const win = checkWinner(this.state.squares);
+      const win = checkWinner(this.state.squares, this.state.turns);
       const playButton = document.getElementsByClassName('play')[0];
       let status;
         if (win) {
-          status = 'Winner: ' + (this.state.redisNext ? 'Yellow' : 'Red')
-          playButton.style.visibility = 'visible';
+          status = 'Winner: ' + (this.state.redisNext ? 'Yellow' : 'Red');
           this.state.squares = Array(42).fill('orange');
+          playButton.style.visibility = 'visible';
+          this.state.turns = 0;
+        }
+
+        else if (win === null) {
+          status = 'Tie';
+          playButton.style.visibility = 'visible';
+          this.state.turns = 0;
         }
 
         else {
           status = 'Next player: ' + (this.state.redisNext ? 'Red' : 'Yellow');
         }
 
-  function checkWinner(sq) {
+  function checkWinner(sq, turns) {
     var winner = false
     for(let i = 0; i < winners.length; i++) {
       const [a, b, c, d] = winners[i]
         if(sq[a] === 'red' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
           winner = true
         }
+
         else if(sq[a] === 'yellow' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
           winner = true
+        }
+
+        else if(turns === sq.length) {
+          winner = null
         }
     }
     return winner
