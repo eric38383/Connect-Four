@@ -37,7 +37,6 @@ body {
 }
 
 .square {
-  background: #fff;
   border: 8px inset blue;
   border-radius: 50px;
   float: left;

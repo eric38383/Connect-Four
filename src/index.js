@@ -82,7 +82,7 @@ const winners = [
 class Square extends React.Component {
   render() {
     return (
-      <button className="square" onClick={this.props.onClick}>
+      <button style={this.props.background} className="square" onClick={this.props.onClick}>
     
       </button>
     )
@@ -91,8 +91,10 @@ class Square extends React.Component {
 
 class Play extends React.Component {
   render() {
+    const { visible } = this.props;
+    const style = visible || visible === null ? { visibility: 'visible' } : { visibility: 'hidden' };
     return (
-      <button className="play" onClick={this.props.onClick}>
+      <button style={style} className="play" onClick={this.props.onClick}>
         {this.props.value}
       </button>
     )
@@ -100,110 +102,114 @@ class Play extends React.Component {
 }
 
 class Board extends React.Component {
-  
   constructor() {
     super();
     this.state = {
       squares: Array(42).fill(null),
       redisNext: true,
       turns: 0,
+      winner: false,
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const { winner } = this.state;
+    const clickPlay = nextState.winner;
+
+    if((winner || winner === null) && clickPlay) {
+      return false;
+    }
+    return true;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const winner = this.checkWinner(this.state.squares, this.state.turns);
+
+    if (winner || winner === null) {   
+      this.setState({
+        winner: winner,
+        turns: 0,
+      })
+    }
+  }
+
+  checkWinner(sq, turns) {
+    let winner = false;
+
+    for(let i = 0; i < winners.length; i++) {
+      const [a, b, c, d] = winners[i];
+
+        if(sq[a] === 'red' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
+          winner = true;
+        }
+
+        else if(sq[a] === 'yellow' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
+          winner = true;
+        }
+
+        else if(turns === sq.length) {
+          winner = null;
+        }
+    }
+    return winner;
+  }
+
   handleClick(i) {
-    const squares = this.state.squares.slice();
-    const squareNodes = document.querySelectorAll('.square');
-    console.log(this.state.turns)
-    if(checkMove(squares, i)) {
+    const { squares, winner } = this.state;
+
+    if(checkMove(squares, i) && !winner) {
 
       if(this.state.redisNext) {
-        squareNodes[i].style.backgroundColor = 'red'
-        squares[i] = squareNodes[i].style.backgroundColor;
+        squares[i] = 'red';
       }
 
       else {
-        squareNodes[i].style.backgroundColor = 'yellow'
-        squares[i] = squareNodes[i].style.backgroundColor;
+        squares[i] = 'yellow';
       }
-
-      this.state.turns += 1;
 
       this.setState({
         squares: squares,
         redisNext: !this.state.redisNext,
+        turns : this.state.turns + 1,
       });
-
     }
 
     function checkMove(sq, index) {
         if(sq[index] !== null || sq[index + 7] === null) {
-            return false
+            return false;
         }
-      return true
+      return true;
     }
   }
 
   restartGame () {
-      const squareNodes = document.querySelectorAll('.square');
-      const playButton = document.getElementsByClassName('play')[0];
       this.setState({
         squares: Array(42).fill(null),
+        winner: false,
       })
-      status = 'Next player: ' + (this.state.redisNext ? 'Yellow' : 'Red');
-
-        for(let i = 0; i < squareNodes.length; i++) {
-           squareNodes[i].style.backgroundColor = "#FFF";   
-        }
-      playButton.style.visibility = 'hidden'
   }
 
   renderSquare(i) {
-    return <Square onClick={() => this.handleClick(i)} />;
+    const square = this.state.squares[i];
+    const background = { background: square };
+    return <Square background={background} onClick={() => this.handleClick(i)} />;
   }
 
   render() {
-      const win = checkWinner(this.state.squares, this.state.turns);
-      const playButton = document.getElementsByClassName('play')[0];
-      let status;
-        if (win) {
-          status = 'Winner: ' + (this.state.redisNext ? 'Yellow' : 'Red');
-          this.state.squares = Array(42).fill('orange');
-          playButton.style.visibility = 'visible';
-          this.state.turns = 0;
-        }
+    const { redisNext, winner }= this.state;
+    let status = "Next Player: " + (redisNext ? 'Red': 'Yellow');
 
-        else if (win === null) {
-          status = 'Tie';
-          playButton.style.visibility = 'visible';
-          this.state.turns = 0;
-        }
-
-        else {
-          status = 'Next player: ' + (this.state.redisNext ? 'Red' : 'Yellow');
-        }
-
-  function checkWinner(sq, turns) {
-    var winner = false
-    for(let i = 0; i < winners.length; i++) {
-      const [a, b, c, d] = winners[i]
-        if(sq[a] === 'red' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
-          winner = true
-        }
-
-        else if(sq[a] === 'yellow' && sq[a] === sq[b] && sq[a] === sq[c] && sq[a] === sq[d]) {
-          winner = true
-        }
-
-        else if(turns === sq.length) {
-          winner = null
-        }
+    if (winner) {
+      status = (redisNext ? 'Yellow ' : 'Red ') + 'Wins';
     }
-    return winner
-  }
+
+    else if (winner === null) {
+      status = 'Tie';
+    }
 
     return (
     <div className="center">
-        <Play value="Play" onClick={() => this.restartGame()}/>
+        <Play visible={winner} value="Play" onClick={() => this.restartGame()}/>
       <div className="status">{status}</div>
         <div className="game-board">
           <div className="board-row">
